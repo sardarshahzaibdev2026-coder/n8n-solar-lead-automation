@@ -1,0 +1,1157 @@
+{
+  "name": "Solar AI Lead Qualification & Booking System",
+  "nodes": [
+    {
+      "parameters": {
+        "sendTo": "={{ $('Solar Consultation Form Trigger').item.json['Email Address'] }}",
+        "subject": "Solar Consultation – Please Select Your Preferred Time",
+        "message": "Hello,  Thank you for choosing our solar consultation service.  We have received your preferred consultation date and time. Our team will review your appointment details and contact you with confirmation.  Best regards, Solar Consultation Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1920,
+        -592
+      ],
+      "id": "213b2aa7-d02f-42b6-aaf1-af87be3df072",
+      "name": "Send a message1",
+      "webhookId": "6a7dd9fb-2a4c-4fd0-a302-10f9df5ed5c4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VA0IJbApuwkx4dfR",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Solar Consultation Request",
+        "formDescription": "Please submit your details to receive a personalized solar consultation.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Customer Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email Address",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Phone Number",
+              "fieldType": "number"
+            },
+            {
+              "fieldLabel": "Location"
+            },
+            {
+              "fieldLabel": "Monthly Electricity Bill",
+              "fieldType": "number"
+            },
+            {
+              "fieldLabel": "Solar Requirement",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Residential Solar"
+                  },
+                  {
+                    "option": "Commercial Solar"
+                  },
+                  {
+                    "option": "Solar System Upgrade"
+                  },
+                  {
+                    "option": "General Inquiry"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Preferred Consultation Date",
+              "fieldType": "date"
+            },
+            {
+              "fieldLabel": "Preferred Consultation Time"
+            },
+            {
+              "fieldLabel": "Additional Message"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        -496
+      ],
+      "id": "0fd0a6d9-9fad-4e2e-9a04-2aa4e1951ca2",
+      "name": "Solar Consultation Form Trigger",
+      "webhookId": "8daa3fd5-687d-4bb7-b49d-5606b3cdccc9"
+    },
+    {
+      "parameters": {
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        -496
+      ],
+      "id": "490f7f2f-cd7d-4e8b-af28-ca272dbfbb16",
+      "name": "Prepare Customer Lead Data"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\n={{\n  \"Customer Name: \" + $json[\"Customer Name\"] +\n  \"\\nEmail Address: \" + $json[\"Email Address\"] +\n  \"\\nPhone Number: \" + $json[\"Phone Number\"] +\n  \"\\nLocation: \" + $json[\"Location\"] +\n  \"\\nMonthly Electricity Bill: \" + $json[\"Monthly Electricity Bill\"] +\n  \"\\nSolar Requirement: \" + $json[\"Solar Requirement\"]\n}}\n",
+        "options": {
+          "systemMessage": "# ROLE\nYou are an expert AI Solar Lead Qualification Assistant working inside an automated Solar Lead Management System.\n\nYour responsibility is to carefully analyze customer information, understand their actual interest in solar energy, evaluate their buying readiness, and classify every lead into exactly one of these categories:\n\n- High\n- Medium\n- Low\n\nYou must make decisions based on the customer's actual intent, urgency, readiness, and consultation requirements.\n\n# CUSTOMER INFORMATION\n\nAnalyze the following customer details:\n\nCustomer Name:\n{{ $('On form submission').item.json['Customer Name'] }}\n\nEmail Address:\n{{ $('On form submission').item.json['Email Address'] }}\n\nPhone Number:\n{{ $('On form submission').item.json['Phone Number'] }}\n\nLocation:\n{{ $('On form submission').item.json['Location'] }}\n\nMonthly Electricity Bill:\n{{ $('On form submission').item.json['Monthly Electricity Bill'] }}\n\nSolar Requirement:\n{{ $('On form submission').item.json['Solar Requirement'] }}\n\nPreferred Consultation Date:\n{{ $('On form submission').item.json['Preferred Consultation Date'] }}\n\nPreferred Consultation Time:\n{{ $('On form submission').item.json['Preferred Consultation Time'] }}\n\nCustomer Message:\n{{ $('On form submission').item.json['Message'] }}\n\n# LEAD CLASSIFICATION RULES\n\n## 1. HIGH PRIORITY\n\nClassify a lead as HIGH when the customer clearly demonstrates strong interest and readiness.\n\nExamples:\n- Wants to install a solar system as soon as possible.\n- Is ready to purchase or proceed with installation.\n- Explicitly requests an installation consultation or quotation and shows strong buying intent.\n- Has an urgent solar installation requirement.\n- Wants to discuss the installation process and move forward soon.\n\nRecommended Next Step:\nContact the customer promptly and arrange a consultation if suitable.\n\n## 2. MEDIUM PRIORITY\n\nClassify a lead as MEDIUM when the customer has genuine interest but is not yet ready to make a final decision.\n\nExamples:\n- Is researching solar system prices.\n- Wants to compare different solar options.\n- Needs more information about installation, cost, or benefits.\n- Is considering solar installation in the future.\n- Wants a quotation but has not confirmed readiness to proceed.\n- Is interested but needs additional guidance before deciding.\n\nRecommended Next Step:\nSend helpful information, explain available options, and follow up later.\n\n## 3. LOW PRIORITY\n\nClassify a lead as LOW when the customer has little or no current buying intent.\n\nExamples:\n- Only wants general educational information about solar energy.\n- Explicitly says they do not want to install solar panels.\n- Says they are not planning to purchase a solar system.\n- Is not interested in a consultation or quotation.\n- Has no current installation requirement.\n- Is only exploring solar energy without any intention to proceed.\n\nRecommended Next Step:\nSend general educational information and keep the customer in the CRM for possible future follow-up.\n\n# IMPORTANT DECISION RULES\n\n1. Customer intent and buying readiness are more important than the monthly electricity bill.\n2. A high electricity bill alone does NOT make a lead HIGH priority.\n3. A low electricity bill alone does NOT make a lead LOW priority.\n4. A customer requesting general information without installation intent should normally be LOW.\n5. A customer who wants to install soon and is ready to proceed should normally be HIGH.\n6. A customer who is interested but still comparing or researching should normally be MEDIUM.\n7. If the customer explicitly says they are not interested in installing solar, classify them as LOW unless their message clearly describes a changed, current intention to proceed.\n8. Do not invent customer information or assume buying intent.\n9. If the message is missing or unclear, use the other available information and avoid making unsupported assumptions.\n10. A preferred consultation date or time alone does not automatically make a lead HIGH.\n11. If information is contradictory, prioritize the customer's clearest and most recent statement of intent.\n12. Every lead must receive exactly one classification: High, Medium, or Low.\n\n# OUTPUT REQUIREMENTS\n\nReturn ONLY one valid JSON object.\n\nDo not include Markdown.\nDo not include code fences.\nDo not include explanations outside the JSON.\nDo not add any extra fields.\n\nUse this exact JSON structure:\n\n{\n  \"lead_priority\": \"High\",\n  \"reason\": \"A clear explanation of the customer's actual interest and buying readiness.\",\n  \"recommended_next_step\": \"A practical next action based on the assigned priority.\"\n}\n\n# FINAL VALIDATION\n\nBefore returning your response:\n- Verify that lead_priority is exactly High, Medium, or Low.\n- Ensure reason matches the customer's actual information.\n- Ensure recommended_next_step matches the assigned priority.\n- Ensure the output is valid JSON.\n- Never return multiple classifications.\n- Never classify a customer as High merely because they submitted a form."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        448,
+        -496
+      ],
+      "id": "d1019810-e03a-4fbf-ae0e-2ae6d2d0ca22",
+      "name": "AI Lead Qualification Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        256,
+        -176
+      ],
+      "id": "1ae7de4e-8db9-4306-a43d-60e5aaf9ce65",
+      "name": "Solar AI Language Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "5wYJTsidZfa6Ywe9",
+          "name": "Ollama account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst raw = $json.output;\n\nconst result = typeof raw === 'string'\n  ? JSON.parse(raw)\n  : raw;\n\nreturn {\n  json: {\n    ...$json,\n    lead_priority: result.lead_priority,\n    customer_requirement: result.customer_requirement,\n    reason: result.reason,\n    recommended_next_step: result.recommended_next_step\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        -496
+      ],
+      "id": "c9d5c45b-669d-4af2-a9c0-86b0dd282977",
+      "name": "Parse AI Lead Classification"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.lead_priority }}",
+                    "rightValue": "High",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "6e7f1c68-36bd-4410-9f99-62a973c0beb1"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "3141fbfd-397c-4177-b786-25329530309d",
+                    "leftValue": "={{ $json.lead_priority }}",
+                    "rightValue": "Medium",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "586c7ad3-b398-447e-9a47-55b5e0504315",
+                    "leftValue": "={{ $json.lead_priority }}",
+                    "rightValue": "Low",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1024,
+        -512
+      ],
+      "id": "ca473aab-27e1-46a0-ac4c-f3cd4cc19ec0",
+      "name": "Route Leads by Priority"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appkvRopjxYuBFcS3",
+          "mode": "list",
+          "cachedResultName": "Solar Leads CRM",
+          "cachedResultUrl": "https://airtable.com/appkvRopjxYuBFcS3"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblCn0X3ExhXLGNbz",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appkvRopjxYuBFcS3/tblCn0X3ExhXLGNbz"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Customer Name": "={{ $('Solar Consultation Form Trigger').item.json['Customer Name'] }}",
+            "Email Address": "={{ $('Solar Consultation Form Trigger').item.json['Email Address'] }}",
+            "Phone Number": "={{ $('Solar Consultation Form Trigger').item.json['Phone Number'] }}",
+            "Location": "={{ $('Solar Consultation Form Trigger').item.json.Location }}",
+            "Monthly Electricity Bill": "={{ $('Solar Consultation Form Trigger').item.json['Monthly Electricity Bill'] }}",
+            "Solar Requirement": "={{ $('Solar Consultation Form Trigger').item.json['Solar Requirement'] }}",
+            "Lead Priority": "={{ $json.lead_priority }}",
+            "Reason": "={{ $json.reason }}",
+            "Recommended Next Step": "={{ $json.recommended_next_step }}",
+            "Preferred Consultation Date": "={{ DateTime.fromISO($('Solar Consultation Form Trigger').item.json['Preferred Consultation Date']).toFormat('yyyy-MM-dd') }}",
+            "Preferred Consultation Time": "={{ $('Solar Consultation Form Trigger').item.json['Preferred Consultation Time'] }}",
+            "Message": "={{ $('Solar Consultation Form Trigger').item.json.Message }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Customer Name",
+              "displayName": "Customer Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email Address",
+              "displayName": "Email Address",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Monthly Electricity Bill",
+              "displayName": "Monthly Electricity Bill",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Solar Requirement",
+              "displayName": "Solar Requirement",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Lead Priority",
+              "displayName": "Lead Priority",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "High",
+                  "value": "High"
+                },
+                {
+                  "name": "Medium",
+                  "value": "Medium"
+                },
+                {
+                  "name": "Low",
+                  "value": "Low"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Reason",
+              "displayName": "Reason",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Recommended Next Step",
+              "displayName": "Recommended Next Step",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Preferred Consultation Date",
+              "displayName": "Preferred Consultation Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Preferred Consultation Time",
+              "displayName": "Preferred Consultation Time",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1248,
+        -688
+      ],
+      "id": "e95dab01-d5f3-4060-892a-7268dae73ff8",
+      "name": "Save High Priority Lead",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "tJ0H53x1HEpC8a1j",
+          "name": "Airtable Personal Access Token account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Solar Consultation Form Trigger').item.json['Email Address'] }}",
+        "subject": "Solar Consultation Request Received",
+        "message": "=Hello {{ $('Solar Consultation Form Trigger').item.json['Customer Name'] }},  Thank you for submitting your solar consultation request.  We have successfully received your information. Our team will review your solar requirements and contact you regarding the next steps.  Thank you for your interest!  Best regards, Solar Consultation Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1472,
+        -688
+      ],
+      "id": "16fc5c37-e890-4adb-8d68-9882ebf3069b",
+      "name": "Send High Priority Acknowledgment1",
+      "webhookId": "c53c0189-ab07-4dbe-980e-362f8401543a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VA0IJbApuwkx4dfR",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "dc9a2577-1d7f-4b6e-ad49-977327ccb083",
+              "leftValue": "={{ $('Solar Consultation Form Trigger').item.json['Preferred Consultation Date'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "cf6688fd-ecf0-4b9d-abce-9c5f5970b5ca",
+              "leftValue": "={{ $('Solar Consultation Form Trigger').item.json['Preferred Consultation Time'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1696,
+        -688
+      ],
+      "id": "3e18f38f-f555-4f31-ac9a-5d5322de6605",
+      "name": "Check Consultation Date & Time"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "sardarshahzaib.dev.2026@gmail.com",
+          "mode": "list",
+          "cachedResultName": "sardarshahzaib.dev.2026@gmail.com"
+        },
+        "start": "={{ DateTime.fromISO($('Solar Consultation Form Trigger').item.json['Preferred Consultation Date'] + 'T11:00:00', { zone: 'Asia/Karachi' }).toISO() }}",
+        "end": "={{ DateTime.fromISO($('Solar Consultation Form Trigger').item.json['Preferred Consultation Date'] + 'T11:30:00', { zone: 'Asia/Karachi' }).toISO() }}",
+        "additionalFields": {
+          "description": "=Customer:{{ $('Solar Consultation Form Trigger').item.json['Customer Name'] }} Email Address:{{ $('Solar Consultation Form Trigger').item.json['Email Address'] }} Phone:{{ $('Solar Consultation Form Trigger').item.json['Phone Number'] }}  Location:{{ $('Solar Consultation Form Trigger').item.json.Location }}  Solar Requirement:{{ $('Solar Consultation Form Trigger').item.json['Solar Requirement'] }} ",
+          "summary": "=Solar Consultation - {{ $('Solar Consultation Form Trigger').item.json['Customer Name'] }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1920,
+        -784
+      ],
+      "id": "2673c58e-00c9-424a-8432-bcc62a0bf4b0",
+      "name": "Send Consultation Scheduling Notice",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "l5g6Gc1uT4f5nIWo",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appkvRopjxYuBFcS3",
+          "mode": "list",
+          "cachedResultName": "Solar Leads CRM",
+          "cachedResultUrl": "https://airtable.com/appkvRopjxYuBFcS3"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblCn0X3ExhXLGNbz",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appkvRopjxYuBFcS3/tblCn0X3ExhXLGNbz"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Customer Name": "={{ $('Solar Consultation Form Trigger').item.json['Customer Name'] }}",
+            "Email Address": "={{ $('Solar Consultation Form Trigger').item.json['Email Address'] }}",
+            "Phone Number": "={{ $('Solar Consultation Form Trigger').item.json['Phone Number'] }}",
+            "Location": "={{ $('Solar Consultation Form Trigger').item.json.Location }}",
+            "Monthly Electricity Bill": "={{ $('Solar Consultation Form Trigger').item.json['Monthly Electricity Bill'] }}",
+            "Solar Requirement": "={{ $('Solar Consultation Form Trigger').item.json['Solar Requirement'] }}",
+            "Lead Priority": "={{ $json.lead_priority }}",
+            "Reason": "={{ $json.reason }}",
+            "Recommended Next Step": "={{ $json.recommended_next_step }}",
+            "Preferred Consultation Date": "={{ DateTime.fromISO($('Solar Consultation Form Trigger').item.json['Preferred Consultation Date']).toFormat('yyyy-MM-dd') }}",
+            "Preferred Consultation Time": "={{ $('Solar Consultation Form Trigger').item.json['Preferred Consultation Time'] }}",
+            "Additional Message": "={{ $('Solar Consultation Form Trigger').item.json['Additional Message'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Customer Name",
+              "displayName": "Customer Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email Address",
+              "displayName": "Email Address",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Monthly Electricity Bill",
+              "displayName": "Monthly Electricity Bill",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Solar Requirement",
+              "displayName": "Solar Requirement",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Lead Priority",
+              "displayName": "Lead Priority",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "High",
+                  "value": "High"
+                },
+                {
+                  "name": "Medium",
+                  "value": "Medium"
+                },
+                {
+                  "name": "Low",
+                  "value": "Low"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Reason",
+              "displayName": "Reason",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Recommended Next Step",
+              "displayName": "Recommended Next Step",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Preferred Consultation Date",
+              "displayName": "Preferred Consultation Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Preferred Consultation Time",
+              "displayName": "Preferred Consultation Time",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Additional Message",
+              "displayName": "Additional Message",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1248,
+        -496
+      ],
+      "id": "b6e619a0-c84c-4149-92e2-b22e6cea3322",
+      "name": "Save Medium Priority Lead",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "tJ0H53x1HEpC8a1j",
+          "name": "Airtable Personal Access Token account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Solar Consultation Form Trigger').item.json['Email Address'] }}",
+        "subject": "Solar Consultation Request – Under Review",
+        "message": "=\n\nHello {{ $('Solar Consultation Form Trigger').item.json['Customer Name'] }},\n\nThank you for submitting your solar consultation request.\n\nWe have received your details. Our team will review your solar requirements and evaluate the best possible solution for your needs.\n\nWe will contact you soon with the next steps.\n\nBest regards,  \nSolar Consultation Team\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1472,
+        -496
+      ],
+      "id": "18d241a8-22fd-4924-aa37-a4caff19af30",
+      "name": "Send Medium Priority Acknowledgment",
+      "webhookId": "c53c0189-ab07-4dbe-980e-362f8401543a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VA0IJbApuwkx4dfR",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appkvRopjxYuBFcS3",
+          "mode": "list",
+          "cachedResultName": "Solar Leads CRM",
+          "cachedResultUrl": "https://airtable.com/appkvRopjxYuBFcS3"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblCn0X3ExhXLGNbz",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appkvRopjxYuBFcS3/tblCn0X3ExhXLGNbz"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Customer Name": "={{ $('Solar Consultation Form Trigger').item.json['Customer Name'] }}",
+            "Email Address": "={{ $('Solar Consultation Form Trigger').item.json['Email Address'] }}",
+            "Phone Number": "={{ $('Solar Consultation Form Trigger').item.json['Phone Number'] }}",
+            "Location": "={{ $('Solar Consultation Form Trigger').item.json.Location }}",
+            "Monthly Electricity Bill": "={{ $('Solar Consultation Form Trigger').item.json['Monthly Electricity Bill'] }}",
+            "Solar Requirement": "={{ $('Solar Consultation Form Trigger').item.json['Solar Requirement'] }}",
+            "Lead Priority": "={{ $json.lead_priority }}",
+            "Reason": "={{ $json.reason }}",
+            "Recommended Next Step": "={{ $json.recommended_next_step }}",
+            "Preferred Consultation Date": "={{ DateTime.fromISO($('Solar Consultation Form Trigger').item.json['Preferred Consultation Date']).toFormat('yyyy-MM-dd') }}",
+            "Preferred Consultation Time": "={{ $('Solar Consultation Form Trigger').item.json['Preferred Consultation Time'] }}",
+            "Message": "={{ $('Solar Consultation Form Trigger').item.json.Message }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Customer Name",
+              "displayName": "Customer Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email Address",
+              "displayName": "Email Address",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Monthly Electricity Bill",
+              "displayName": "Monthly Electricity Bill",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Solar Requirement",
+              "displayName": "Solar Requirement",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Lead Priority",
+              "displayName": "Lead Priority",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "High",
+                  "value": "High"
+                },
+                {
+                  "name": "Medium",
+                  "value": "Medium"
+                },
+                {
+                  "name": "Low",
+                  "value": "Low"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Reason",
+              "displayName": "Reason",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Recommended Next Step",
+              "displayName": "Recommended Next Step",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Preferred Consultation Date",
+              "displayName": "Preferred Consultation Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Preferred Consultation Time",
+              "displayName": "Preferred Consultation Time",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1248,
+        -304
+      ],
+      "id": "12c26f14-1cca-4e99-bd54-aecfe9d2ae52",
+      "name": "Send Low Priority Acknowledgment",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "tJ0H53x1HEpC8a1j",
+          "name": "Airtable Personal Access Token account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Solar Consultation Form Trigger').item.json['Email Address'] }}",
+        "subject": "Solar Consultation Request – Received",
+        "message": "=\n\nHello {{ $('Solar Consultation Form Trigger').item.json['Customer Name'] }},\n\nThank you for your interest in our solar consultation service.\n\nWe have successfully received your request. Our team will review the information you provided and contact you if further details or assistance are needed.\n\nThank you for considering our solar services.\n\nBest regards,  \nSolar Consultation Team\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1472,
+        -304
+      ],
+      "id": "29ff9859-2e6c-4678-aace-d02cae0bd986",
+      "name": "Send Low Priority Acknowledgment1",
+      "webhookId": "c53c0189-ab07-4dbe-980e-362f8401543a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VA0IJbApuwkx4dfR",
+          "name": "Gmail account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Solar Consultation Form Trigger": {
+      "main": [
+        [
+          {
+            "node": "Prepare Customer Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Customer Lead Data": {
+      "main": [
+        [
+          {
+            "node": "AI Lead Qualification Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Lead Qualification Agent": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Lead Classification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Solar AI Language Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Lead Qualification Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Lead Classification": {
+      "main": [
+        [
+          {
+            "node": "Route Leads by Priority",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Leads by Priority": {
+      "main": [
+        [
+          {
+            "node": "Save High Priority Lead",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save Medium Priority Lead",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Low Priority Acknowledgment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save High Priority Lead": {
+      "main": [
+        [
+          {
+            "node": "Send High Priority Acknowledgment1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send High Priority Acknowledgment1": {
+      "main": [
+        [
+          {
+            "node": "Check Consultation Date & Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Consultation Date & Time": {
+      "main": [
+        [
+          {
+            "node": "Send Consultation Scheduling Notice",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Medium Priority Lead": {
+      "main": [
+        [
+          {
+            "node": "Send Medium Priority Acknowledgment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Low Priority Acknowledgment": {
+      "main": [
+        [
+          {
+            "node": "Send Low Priority Acknowledgment1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d647ac1f-2957-4d7f-a3b6-3fc69fbb8a6f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6e09abedfd28e85ac261ad9898070b7bd18a6bacefa80cf22df0369b64fe23b9"
+  },
+  "nodeGroups": [],
+  "id": "yBMsCqbZaaVZqenN",
+  "tags": []
+}
